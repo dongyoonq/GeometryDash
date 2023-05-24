@@ -21,9 +21,24 @@ public class PlayerGroundMake : MonoBehaviour
                 new Vector3(prevGround.transform.position.x + 24.28f,
                 prevGround.transform.position.y, 0f),
                 prevGround.transform.rotation);
+            newInstance.SetActive(false);
+            StartCoroutine(OnableGround(newInstance));
+            StartCoroutine(DisableGround(prevGround));
             prevGround.transform.GetChild(1).GetComponent<BoxCollider2D>().enabled = false;
-            Destroy(prevGround, 4f);
+            // Destroy(prevGround, 4f);
             prevGround = newInstance;
         }
+    }
+
+    IEnumerator OnableGround(GameObject newInstance)
+    {
+        yield return new WaitForSeconds(0.01f);
+        newInstance.SetActive(true);
+    }
+
+    IEnumerator DisableGround(GameObject prevInstance)
+    {
+        yield return new WaitForSeconds(4f);
+        prevInstance.SetActive(false);
     }
 }
