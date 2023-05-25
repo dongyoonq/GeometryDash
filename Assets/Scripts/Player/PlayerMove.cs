@@ -5,7 +5,7 @@ public class PlayerMove : MonoBehaviour
 {
     public float moveSpeed = 5f;        // 오른쪽으로 이동하는 속도
     public float jumpForce = 6f;        // 점프하는 힘
-    public float rotationSpeed = -180f;  // 한 바퀴 회전하는 속도
+    public float rotationSpeed = 360f;  // 한 바퀴 회전하는 속도
 
     private Rigidbody2D player;
     private bool isJumping = false;
