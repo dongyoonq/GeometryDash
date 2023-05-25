@@ -15,7 +15,7 @@ public class ObstacleGenerator : MonoBehaviour
     // Jump_flat: y-axis unchanged 유지 
     // Jump_down: y_axis decrease  떡락하는상황이다. 
     [Header("Player Info")]
-    public float playerHeight;
+    public int playerHeight;
     public StateBase<ObstacleGenerator>[] stateList;
     public STATE curState;
 
@@ -80,7 +80,7 @@ public class ObstacleGenerator : MonoBehaviour
         {
             //FourActions(); 
             GenerateObs();
-            yield return new WaitForSeconds(2);  
+            yield return new WaitForSeconds(5);  
         }
     }
 
@@ -94,7 +94,7 @@ public class ObstacleGenerator : MonoBehaviour
         }
         foreach(int i in four)
         {
-            Debug.Log(i);
+            Debug.Log(four.Count);
         }
         fourMoves = four;
     }
@@ -204,7 +204,7 @@ namespace playerstate
                     JumpDown(spawnIndex);
                     break; 
             }
-            Exit(); 
+            //Exit(); 
         }
 
         private void JumpUp(int spawnIndex)
@@ -215,11 +215,11 @@ namespace playerstate
             {
                 case 0:
                     blockType = _JumpUp.jump_up_1.ToString();
-                    owner.playerHeight += 0.5f; 
+                    owner.playerHeight += 2; 
                     break;
                 case 1:
                     blockType = _JumpUp.jump_up_2.ToString();
-                    owner.playerHeight += 0.5f;
+                    owner.playerHeight += 2;
                     break;
             }
             owner.spawnPoints[spawnIndex].position = new Vector2(owner.spawnPoints[spawnIndex].position.x,
@@ -261,7 +261,7 @@ namespace playerstate
         private void JumpDown(int spawnIndex)
         {
             blockType = _JumpDown.jump_down.ToString();
-            owner.playerHeight -= 0.5f;
+            owner.playerHeight -= 2;
             GameManager.Pool.SetforRelease(blockType, owner.spawnPoints[spawnIndex]);
         }
     }
@@ -308,7 +308,7 @@ namespace playerstate
                     break;
                 case 2:
                     value = NoJump.fall_down;
-                    owner.playerHeight -= 0.5f; 
+                    owner.playerHeight -= 2; 
                     break;
             }
             owner.spawnPoints[spawnIndex].position = new Vector2(owner.spawnPoints[spawnIndex].position.x,
@@ -318,7 +318,7 @@ namespace playerstate
             // if height has reached limit: Top 
 
             // if height has reached limit: Bottom
-            Exit();
+            //Exit();
         }
     }
 }

@@ -66,6 +66,7 @@
     <Compile Include="Assets\Scripts\Obstacles\Managers\DataManager.cs" />
     <Compile Include="Assets\Scripts\Obstacles\Managers\GameManager.cs" />
     <Compile Include="Assets\Config\GameSetting.cs" />
+    <Compile Include="Assets\Scripts\Obstacles\GroundScroller.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Imports\Geometry Dash Lite.2.2.11Assets\res\ur.xml" />

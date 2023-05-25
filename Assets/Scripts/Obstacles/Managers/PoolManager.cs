@@ -53,7 +53,7 @@ public class PoolManager : MonoBehaviour
     public void ReturnBlockToPool(GameObject block)
     {
         string blockType = block.name;
-
+        TransfertoActive(block); 
         // Deactivate the block and return it to the pool
         block.SetActive(false);
         activeGameObjects[blockType].Dequeue();
@@ -106,9 +106,10 @@ public class PoolManager : MonoBehaviour
         StockCheck(blockType);
         GameObject releasable = inactiveGameObjects[blockType].Dequeue();
         releasable.transform.position = releasePoint.position;
-        releasable.SetActive(true);
         TransfertoActive(releasable);
         activeGameObjects[blockType].Enqueue(releasable);
+        releasable.SetActive(true);
+
     }
 
     public void TriggerRelease()

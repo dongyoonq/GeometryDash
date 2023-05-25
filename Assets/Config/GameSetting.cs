@@ -16,6 +16,7 @@ public class GameSetting
         {
             GameObject gameManager = new GameObject() { name = "Game Manager" };
             gameManager.AddComponent<GameManager>();
+            gameManager.transform.position = new Vector2(0, 0); 
         }
     }
 }

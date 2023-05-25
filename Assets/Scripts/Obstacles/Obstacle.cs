@@ -29,6 +29,7 @@ public class Obstacle : MonoBehaviour
 
     private void SwitchState()
     {
+        Debug.Log("Move!"); 
         curState = State.Launch;
     }
 
