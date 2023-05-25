@@ -6,26 +6,26 @@ public enum Gamemodes { Cube = 0, Ship = 1 }
 
 public class PlayerMoveFix : MonoBehaviour
 {
-    public float jumpForce = 6f;        // 점프하는 힘
-    public float rotationSpeed = 360f;  // 한 바퀴 회전하는 속도
-    public Transform Sprite;
-
+    public float jumpForce = 27f;        // 점프하는 힘
     private Rigidbody2D player;
-    private bool isJumping = false;
-    private float currentRotation = 0f;
-    private bool isRotating = false;
+
+    public Transform GroundCheckTransform;
+    public float GroundCheckRadius;
+    public LayerMask GroundMask;
+    public Transform Sprite;
 
     public Speed currentSpeed;
     public Gamemodes currentGamemode;
-    public float[] SpeedValues = { 9f, 11f, 13f, 15f, 19f };
+    public float[] SpeedValues = { 9f, 10f, 13f, 16f, 19f };
     int gravity = 1;
 
-    void Awake()
+    private void Start()
     {
         player = GetComponent<Rigidbody2D>();
+        player.gravityScale = 12f;
     }
 
-    void Update()
+    private void Update()
     {
         // 오른쪽으로 이동
         Move();
@@ -33,90 +33,51 @@ public class PlayerMoveFix : MonoBehaviour
         Invoke(currentGamemode.ToString(), 0);
     }
 
-    void Cube()
+    private void Cube()
     {
-        // 회전
-        if (isRotating)
+        if (OnGround())
         {
-            float rotationAmount = rotationSpeed * Time.deltaTime;
-            Sprite.Rotate(Vector3.forward, -rotationAmount * gravity);
-            currentRotation += -rotationAmount;
-
-            /*Vector3 Rotation = Sprite.rotation.eulerAngles;
+            Vector3 Rotation = Sprite.rotation.eulerAngles;
             Rotation.z = Mathf.Round(Rotation.z / 90) * 90;
-            Sprite.rotation = Quaternion.Euler(Rotation * gravity);*/
+            Sprite.rotation = Quaternion.Euler(Rotation * gravity);
 
-            // 360도 회전 후 점프 상태 초기화
-            if (currentRotation <= -180f)
+            if (Input.GetKeyDown(KeyCode.Space))
             {
-                isRotating = false;
-                currentRotation = 0f;
+                player.velocity = Vector2.zero;
+                player.AddForce(Vector2.up * jumpForce * gravity, ForceMode2D.Impulse);
             }
-        }
-    }
-
-    void Ship()
-    {
-        Sprite.rotation = Quaternion.Euler(0, 0, player.velocity.y * 2);
-
-        if(Input.GetMouseButtonDown(0))
-        {
-            player.gravityScale = -4.314969f;
         }
         else
         {
-            player.gravityScale = 4.314969f;
+            Sprite.Rotate(Vector3.back, 400f * Time.deltaTime);
+        }
+    }
+
+    private void Ship()
+    {
+        Sprite.rotation = Quaternion.Euler(0, 0, player.velocity.y * 2);
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            player.gravityScale = -4f;
+        }
+        else
+        {
+            player.gravityScale = 4f;
         }
 
         player.gravityScale *= gravity;
     }
 
-    void Move()
+    private void Move()
     {
         player.velocity = new Vector2(SpeedValues[(int)currentSpeed], player.velocity.y);
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    private bool OnGround()
     {
-        // 바닥에 닿으면 점프 상태 초기화
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
-        {
-            isJumping = false;
-            isRotating = false;
-            currentRotation = 0f;
-        }
-    }
-
-    void OnJump(InputValue value)
-    {
-        // Cube
-        if(currentGamemode == (Gamemodes)0)
-        {
-            if (value.isPressed && !isJumping)
-            {
-                isJumping = true;
-                isRotating = true;
-                player.AddForce(Vector2.up * jumpForce * gravity, ForceMode2D.Force);
-            }
-        }
-        // Ship
-        else if(currentGamemode == (Gamemodes)1)
-        {
-            if (value.isPressed)
-            {
-                player.gravityScale = -4.314969f;
-                isJumping = true;
-                isRotating = true;
-                player.AddForce(Vector2.up * jumpForce * gravity, ForceMode2D.Force);
-            }
-            else
-            {
-                player.gravityScale = 4.314969f;
-                isJumping = true;
-                isRotating = true;
-                player.AddForce(Vector2.up * jumpForce * gravity, ForceMode2D.Force);
-            }
-        }
+        return Physics2D.OverlapBox(transform.position + Vector3.down * gravity * 0.5f,
+            Vector2.right * 1.1f + Vector2.up * GroundCheckRadius, 0, GroundMask);
     }
 
     public void ThroughPortal(Gamemodes Gamemode, Speed Speed, int Gravity, int State)
