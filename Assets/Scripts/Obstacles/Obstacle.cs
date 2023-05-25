@@ -1,13 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 
 public class Obstacle : MonoBehaviour
 {
-    private float speed = 3f; // Speed at which the object moves
+    private float speed = 2.5f; // Speed at which the object moves
     public Transform endpoint;
-
-    public enum State { Idle, Launch };
+    public enum State
+    {
+        Idle, Launch
+    }
     public State curState;
 
     private void Start()
@@ -15,23 +18,16 @@ public class Obstacle : MonoBehaviour
         endpoint = GetComponent<Transform>();
         curState = State.Idle;
         //이벤트 구문 추가 
-        GameManager.Pool.Trigger += SwithState;
+        GameManager.Pool.Trigger += SwitchState;
     }
     private void Update()
     {
-        // Translate the object to the left
-        switch (curState)
-        {
-            case State.Idle:
-                IdleState();
-                break;
-            case State.Launch:
-                LaunchState();
-                break;
-        };
+        if (curState == State.Idle)
+            return;
+        LaunchState(); 
     }
 
-    private void SwithState()
+    private void SwitchState()
     {
         curState = State.Launch;
     }

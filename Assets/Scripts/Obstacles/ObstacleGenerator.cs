@@ -19,36 +19,6 @@ public class ObstacleGenerator : MonoBehaviour
     public StateBase<ObstacleGenerator>[] stateList;
     public STATE curState;
 
-    //Jump 에 해당되는 프리팹 이름들 
-    public enum JumpUp // 2개의 가능성 값들 
-    {
-        JumpUp1,
-        JumpUp2,
-    }
-
-    public enum JumpFlat // 7 개의 가능성 값들 
-    {
-        spikes_flat_1,
-        spikes_flat_2,
-        spikes_flat_3,
-        flat_blocks_spike_1,
-        flat_blocks_spike_2,
-        flat_blocks_spike_3,
-        flat_jump_lava,
-    }
-    public enum JumpDown
-    {
-        jump_down // only 1
-    }
-
-    public enum NoJump // 0: up, 1: flat, 2: down 값이다. 
-    {
-
-        flat_blocks, // up
-        empty, // flat 
-        fall_down // down 
-    }
-
     [Header("Gen Properties")]
     [SerializeField] public Transform[] spawnPoints;
     [SerializeField] public int spawnIndex;
@@ -61,9 +31,9 @@ public class ObstacleGenerator : MonoBehaviour
         stateList[(int)STATE.Start] = new JumpState(this);
         stateList[(int)STATE.Jump] = new JumpState(this);
         stateList[(int)STATE.NoJump] = new NoJumpState(this);
-        spawnPoints = new Transform[4]; 
+        fourMoves = new Queue<int>();
+        //spawnPoints = new Transform[4]; 
         playerHeight = 0;
-        spawnIndex = 0;
     }
 
     private void Start()
@@ -71,20 +41,46 @@ public class ObstacleGenerator : MonoBehaviour
         spawnIndex = 0;
         curState = STATE.Start;
         FourActions();
+        mapGenerate = StartCoroutine(mapGen()); 
     }
 
     private void Update()
     {
         //constantly generate next blocks, but stop when its all made, resume making when trigger released
-        GenerateObs(); 
+        //GenerateObs(); 
     }
     private void GenerateObs()
     {
-        int jumpUporDown = Random.Range(0, 2);
-        foreach (Transform t in spawnPoints)
+        for (int i = 0; i < 4; i++)
         {
-            stateList[(int)curState].Update(spawnIndex, fourMoves.Dequeue());
-            spawnIndex++;
+            spawnIndex = i;
+            int nextstate = fourMoves.Dequeue(); 
+            switch(nextstate)
+            {
+                case 0:
+                    curState = STATE.Jump;
+                    break;
+                case 1:
+                    curState = STATE.NoJump;
+                    break;
+            }
+            stateList[(int)curState].Update(i, nextstate);
+            stateList[(int)curState].Exit();
+            if (i == 3)
+            {
+                FourActions();
+            }
+        }
+    }
+
+    private Coroutine mapGenerate; 
+    IEnumerator mapGen()
+    {
+        while (true)
+        {
+            //FourActions(); 
+            GenerateObs();
+            yield return new WaitForSeconds(2);  
         }
     }
 
@@ -95,6 +91,10 @@ public class ObstacleGenerator : MonoBehaviour
         {
             int randomval = Random.Range(0, 2);
             four.Enqueue(randomval);
+        }
+        foreach(int i in four)
+        {
+            Debug.Log(i);
         }
         fourMoves = four;
     }
@@ -110,9 +110,9 @@ namespace playerstate
 
     public enum _JumpFlat // 7 개의 가능성 값들 
     {
-        spikes_flat_1,
-        spikes_flat_2,
-        spikes_flat_3,
+        spike_flat_1,
+        spike_flat_2,
+        spike_flat_3,
         flat_blocks_spike_1,
         flat_blocks_spike_2,
         flat_blocks_spike_3,
@@ -153,11 +153,12 @@ namespace playerstate
         public override void SetUp()
         {
             throw new System.NotImplementedException();
+            
         }
 
         public override void Update(int spawnIndex, int actionVal)
         {
-            GameManager.Pool.SetforRelease("empty", owner.spawnPoints[spawnIndex]);
+            GameManager.Pool.SetforRelease("empty(Clone)", owner.spawnPoints[spawnIndex]);
         }
     }
     public class JumpState : StateBase<ObstacleGenerator>
@@ -174,10 +175,10 @@ namespace playerstate
 
         public override void Exit()
         {
-            if (owner.spawnIndex != 3)
+            if (owner.spawnIndex < 3)
                 return;
+            //owner.FourActions();
             owner.spawnIndex = 0;
-            owner.FourActions();
             GameManager.Pool.TriggerRelease();
         }
 
@@ -222,24 +223,24 @@ namespace playerstate
                     break;
             }
             owner.spawnPoints[spawnIndex].position = new Vector2(owner.spawnPoints[spawnIndex].position.x,
-                owner.spawnPoints[spawnIndex].position.y + owner.playerHeight);
+                owner.playerHeight);
             GameManager.Pool.SetforRelease(blockType, owner.spawnPoints[spawnIndex]);
         }
 
         private void JumpFlat(int spawnIndex)
         {
-            int nextVariation = Random.Range(0, 2);
+            int nextVariation = Random.Range(0, 7);
 
             switch (nextVariation)
             {
                 case 0:
-                    blockType = _JumpFlat.spikes_flat_1.ToString();
+                    blockType = _JumpFlat.spike_flat_1.ToString();
                     break;
                 case 1:
-                    blockType = _JumpFlat.spikes_flat_2.ToString();
+                    blockType = _JumpFlat.spike_flat_2.ToString();
                     break;
                 case 2:
-                    blockType = _JumpFlat.spikes_flat_3.ToString();
+                    blockType = _JumpFlat.spike_flat_3.ToString();
                     break;
                 case 3:
                     blockType = _JumpFlat.flat_blocks_spike_1.ToString();
@@ -280,7 +281,7 @@ namespace playerstate
 
         public override void Exit()
         {
-            if (owner.spawnIndex != 3)
+            if (owner.spawnIndex < 3)
                 return;
             owner.spawnIndex = 0;
             owner.FourActions(); 
@@ -311,8 +312,9 @@ namespace playerstate
                     break;
             }
             owner.spawnPoints[spawnIndex].position = new Vector2(owner.spawnPoints[spawnIndex].position.x,
-                owner.spawnPoints[spawnIndex].position.y + owner.playerHeight);
-            GameManager.Pool.SetforRelease(value.ToString(), owner.spawnPoints[spawnIndex]);
+                owner.playerHeight);
+            blockname = value.ToString();
+            GameManager.Pool.SetforRelease(blockname, owner.spawnPoints[spawnIndex]);
             // if height has reached limit: Top 
 
             // if height has reached limit: Bottom
