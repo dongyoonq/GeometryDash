@@ -73,7 +73,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5312947615927929248}
   - component: {fileID: 5312947615927929255}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: BackGround
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -408,7 +408,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5312947616617708017}
-  m_Layer: 3
+  m_Layer: 0
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
